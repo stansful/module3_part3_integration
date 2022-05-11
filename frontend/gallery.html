@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+  <meta charset='UTF-8'>
+  <title>Gallery</title>
+  <link rel='stylesheet' href='css/styles.css'>
+</head>
+<body>
+
+<main class='container'>
+  <div class='wrapper'>
+    <form action='/gallery' method='post' enctype='multipart/form-data' id='sending-form'>
+      <input type='file' name='picture' id='picture' />
+      <input type='submit' value='Upload public picture' class='button' id='sending-public-picture'>
+      <label for='queryFilter'>Show only uploaded pictures</label>
+      <input type='checkbox' class='checkbox' id='queryFilter'>
+      <input type='button' value='Upload private picture' class='button' id='sending-private-picture'>
+    </form>
+    <div id='gallery'>
+    </div>
+    <div id='buttons'>
+      <button id='previous' class='button'>Previous</button>
+      <button id='next' class='button'>Next</button>
+    </div>
+  </div>
+</main>
+
+<script src='js/constants.js'></script>
+<script src='js/http_service.js'></script>
+<script src='js/page_service.js'></script>
+<script src='js/token_service.js'></script>
+<script src='js/gallery_service.js'></script>
+<script src='js/metadata_service.js'></script>
+</body>
+</html>

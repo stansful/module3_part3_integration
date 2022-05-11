@@ -1,0 +1,272 @@
+{
+	"info": {
+		"_postman_id": "a90be1d1-23f9-48a6-a4f3-bc670f867f65",
+		"name": "module3_part2",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "get pictures",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": []
+				},
+				"url": {
+					"raw": "{{dev}}gallery",
+					"host": [
+						"{{dev}}gallery"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get pictures query",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "{{dev}}gallery?page=1&limit=10&filter=true",
+					"host": [
+						"{{dev}}gallery"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1"
+						},
+						{
+							"key": "limit",
+							"value": "10"
+						},
+						{
+							"key": "filter",
+							"value": "true"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get preSigned upload public link",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"metadata\": {\n        \"width\": 1920,\n        \"height\": 1080,\n        \"fileSize\": 1000,\n        \"fileExtension\": \"jpeg\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{dev}}gallery",
+					"host": [
+						"{{dev}}gallery"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get preSigned upload private link",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"metadata\": {\n        \"width\": 1920,\n        \"height\": 1080,\n        \"fileSize\": 1000,\n        \"fileExtension\": \"jpeg\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{dev}}gallery/upload",
+					"host": [
+						"{{dev}}gallery"
+					],
+					"path": [
+						"upload"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "upload private/public picture to the bucket",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "file",
+					"file": {
+						"src": "/Users/philipp/Downloads/pexels-giulia-baptista-11483430.jpg"
+					}
+				},
+				"url": {
+					"raw": "https://image-bucket-uniq-uuid.s3.amazonaws.com/67ae2a5e-a7bc-4f1b-99e2-9ca13771f1f5.jpeg?AWSAccessKeyId=ASIAQBHJIHFMSCLAL6G3&Content-Type=image%2Fjpeg&Expires=1651758556&Signature=nPZfUpIOHkXz7wEdwzPWnbUQJHI%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEMb%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJGMEQCIHPiyabSr3utZBrz1owq7YMs69JHD40wN9y3P9AyapeFAiB1HhVr%2BEtGAUxWvhiB5j9DNeBs2rp3hKMeP3QipvGRgCrHAgiP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAAaDDAwMjYzNjY1OTAzMyIMlds2Crlp942qP13sKpsCzmjuK5M%2BhaVhe0TcJxpA6wqGoLcG33aQyDKD1Axu73tXlIsNrQ%2FtRkSHYAd3ew3x10cFrzgXfmSH85NhoZL0zvf7O5%2BRg1lM7XCDkKjv2Da4QsxsB%2BTvXWKckMeNtwF9prGnX415uvJ%2BjvlKEKgocBtRABFcgNR%2B4Gh%2BlYE6uDQNjf0PM1LLaEYBhEZ0Ke9utmMAYpsSZd0j7Z3sb%2B5PgAR2mrkLdC9rV%2F1zMi4EUvdqhbTo3KM2xw8UzwF8pFp0FAKyRKLJzZxK9UJGQmOMemGrq4r7CA6DfwHowlhYyLv9IZP5oe%2Fj4uU17UVsYkXVaHDEWxGFsR4TgBF1BeZW4NwsTDrvbUjvWaslU3xc2%2FHqHjmn%2Bu4ZW6VzrDCuqc%2BTBjqcAdJ%2FTbB%2F7Z2HtAVpJkbCaon%2F9xkgSZiaZMxLwuqi3YWyL9HsytQRxUGM1rnfmRvqz%2F6qqt%2F61vX56lEA92rvjCIpKrspl3Zmyf%2B8OfP5yTlvM5iRx7gXdwRoiGwqmpB41GVSe3Hg%2F%2F7VHT%2FJRBpFIxOZEwwTgXXh%2FezMAj0oHesJ3HnVk4xB76bl4w3PJ8F6vda8JGDc941EABKJ6Q%3D%3D",
+					"protocol": "https",
+					"host": [
+						"image-bucket-uniq-uuid",
+						"s3",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"67ae2a5e-a7bc-4f1b-99e2-9ca13771f1f5.jpeg"
+					],
+					"query": [
+						{
+							"key": "AWSAccessKeyId",
+							"value": "ASIAQBHJIHFMSCLAL6G3"
+						},
+						{
+							"key": "Content-Type",
+							"value": "image%2Fjpeg"
+						},
+						{
+							"key": "Expires",
+							"value": "1651758556"
+						},
+						{
+							"key": "Signature",
+							"value": "nPZfUpIOHkXz7wEdwzPWnbUQJHI%3D"
+						},
+						{
+							"key": "x-amz-security-token",
+							"value": "IQoJb3JpZ2luX2VjEMb%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJGMEQCIHPiyabSr3utZBrz1owq7YMs69JHD40wN9y3P9AyapeFAiB1HhVr%2BEtGAUxWvhiB5j9DNeBs2rp3hKMeP3QipvGRgCrHAgiP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAAaDDAwMjYzNjY1OTAzMyIMlds2Crlp942qP13sKpsCzmjuK5M%2BhaVhe0TcJxpA6wqGoLcG33aQyDKD1Axu73tXlIsNrQ%2FtRkSHYAd3ew3x10cFrzgXfmSH85NhoZL0zvf7O5%2BRg1lM7XCDkKjv2Da4QsxsB%2BTvXWKckMeNtwF9prGnX415uvJ%2BjvlKEKgocBtRABFcgNR%2B4Gh%2BlYE6uDQNjf0PM1LLaEYBhEZ0Ke9utmMAYpsSZd0j7Z3sb%2B5PgAR2mrkLdC9rV%2F1zMi4EUvdqhbTo3KM2xw8UzwF8pFp0FAKyRKLJzZxK9UJGQmOMemGrq4r7CA6DfwHowlhYyLv9IZP5oe%2Fj4uU17UVsYkXVaHDEWxGFsR4TgBF1BeZW4NwsTDrvbUjvWaslU3xc2%2FHqHjmn%2Bu4ZW6VzrDCuqc%2BTBjqcAdJ%2FTbB%2F7Z2HtAVpJkbCaon%2F9xkgSZiaZMxLwuqi3YWyL9HsytQRxUGM1rnfmRvqz%2F6qqt%2F61vX56lEA92rvjCIpKrspl3Zmyf%2B8OfP5yTlvM5iRx7gXdwRoiGwqmpB41GVSe3Hg%2F%2F7VHT%2FJRBpFIxOZEwwTgXXh%2FezMAj0oHesJ3HnVk4xB76bl4w3PJ8F6vda8JGDc941EABKJ6Q%3D%3D"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "auth signIn",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\":\"asergeev@flo.team\",\n    \"password\":\"jgF5tn4F\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{dev}}auth/signIn",
+					"host": [
+						"{{dev}}auth"
+					],
+					"path": [
+						"signIn"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "auth signUp",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\":\"asergeev@flo.team\",\n    \"password\":\"jgF5tn4F\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{dev}}auth/signUp",
+					"host": [
+						"{{dev}}auth"
+					],
+					"path": [
+						"signUp"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "local3",
+			"value": "http://localhost:3000/",
+			"type": "default"
+		},
+		{
+			"key": "dev",
+			"value": "https://1lumgm9kw1.execute-api.us-east-1.amazonaws.com/",
+			"type": "default"
+		},
+		{
+			"key": "token",
+			"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6ImFzZXJnZWV2QGZsby50ZWFtIiwiaWF0IjoxNjUxNjEwNDgxfQ.vW2OVOYPZfrUxdCT3azN8XVd7fP506bgPc6hAm4lQyo",
+			"type": "default"
+		}
+	]
+}

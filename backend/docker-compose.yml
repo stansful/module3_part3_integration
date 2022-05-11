@@ -1,0 +1,30 @@
+# Use postgres/example user/password credentials
+version: '3.1'
+
+services:
+  postgres:
+    image: postgres
+    restart: always
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: example
+  dynamodb:
+    image: amazon/dynamodb-local
+    # -sharedDb makes the nosql workbench able to see tables
+    command: -jar DynamoDBLocal.jar -sharedDb -dbPath .
+    restart: always
+    ports:
+      - '8000:8000'
+  sqs:
+    image: softwaremill/elasticmq
+    restart: always
+    ports:
+      - '9324:9324'
+  sonarqube:
+    container_name: sonarqube
+    image: sonarqube:latest
+    ports:
+      - '9000:9000'
+      - '9092:9092'

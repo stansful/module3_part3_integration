@@ -1,0 +1,266 @@
+openapi: 3.0.0
+servers:
+  - description: Dev server
+    url: https://1lumgm9kw1.execute-api.us-east-1.amazonaws.com/
+info:
+  version: "1.0.0"
+  title: Client project API Documentation
+tags:
+  - name: Auth
+    description: Authenticate user
+paths:
+  /auth/signIn:
+    post:
+      tags:
+        - Auth
+      summary: authenticate user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  description: user email
+                  type: string
+                password:
+                  description: user password
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '401':
+          description: Not Authorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    example: 401
+                  message:
+                    type: string
+  /auth/signUp:
+    post:
+      tags:
+        - Auth
+      summary: create user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  description: user email
+                  type: string
+                password:
+                  description: user password
+                  type: string
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    example: 400
+                  message:
+                    type: string
+
+  /gallery:
+    get:
+      tags:
+        - Gallery
+      summary: gallery with query page parameters
+      parameters:
+        - name: authorization
+          in: header
+          schema:
+            type: string
+          example: token
+        - name: page
+          in: query
+          schema:
+            type: integer
+          example: '2'
+        - name: limit
+          in: query
+          schema:
+            type: integer
+          example: '8'
+        - name: filter
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  objects:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                        path:
+                          type: string
+                          example: http://qwerty.com/images/1.jpeg
+                        metadata:
+                          type: object
+                  page:
+                    type: number
+                    example: 3
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    example: 400
+                  error:
+                    type: string
+                  message:
+                    type: string
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    example: 500
+                  error:
+                    type: string
+                  message:
+                    type: string
+    post:
+      tags:
+        - Gallery
+      summary: receive public picture upload link and picture key
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - metadata
+              properties:
+                metadata:
+                  description: picture metadata
+                  type: object
+                  example: { width: 200, height: 200, fileSize: 9515236, fileExtension: 'jpg' }
+      parameters:
+        - name: authorization
+          in: header
+          schema:
+            type: string
+          example: token
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  uploadUrl:
+                    type: string
+        '401':
+          description: Not Authorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    example: 401
+                  message:
+                    type: string
+
+  /gallery/upload:
+    put:
+      tags:
+        - Gallery/upload
+      summary: receive private picture upload link and picture key
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - metadata
+              properties:
+                metadata:
+                  description: picture metadata
+                  type: object
+                  example: { width: 200, height: 200, fileSize: 9515236, fileExtension: 'jpg' }
+      parameters:
+        - name: authorization
+          in: header
+          schema:
+            type: string
+          example: token
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  key:
+                    type: string
+                  uploadUrl:
+                    type: string
+        '401':
+          description: Not Authorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    example: 401
+                  message:
+                    type: string

@@ -1,0 +1,34 @@
+# ide
+.idea
+.git
+node_modules
+
+# Backend
+# package directories
+backend/node_modules
+backend/offline
+backend/jspm_packages
+backend/.idea/
+backend/.vscode/
+backend/.webpack/
+backend/**/.webpack
+backend/.tmp
+backend/.scannerwork/
+# Serverless directories
+backend/.serverless/
+backend/.build/
+backend/kms_key.yml
+backend/.env
+backend/**/.env
+backend/**/api/**.js
+backend/.nyc_output/
+backend/typings/
+backend/documentation/
+backend/coverage/
+backend/.esbuild/
+
+# Frontend
+frontend/.idea
+frontend/.git
+frontend/js
+frontend/node_modules
