@@ -21,7 +21,15 @@ export class GalleryService {
   private async generatePreSignedUploadResponse(metadata: Metadata, email?: string): Promise<PreSignedUploadResponse> {
     const generatedImageName = (uuid.v4() + '.jpeg').toLowerCase();
 
-    await this.imageService.create({ name: generatedImageName, metadata, status: 'Pending' }, email);
+    await this.imageService.create(
+      {
+        name: generatedImageName,
+        metadata,
+        status: 'Pending',
+        subClipCreated: false,
+      },
+      email
+    );
 
     const uploadUrl = await this.s3Service.getPreSignedPutUrl(generatedImageName, this.imageBucket);
 

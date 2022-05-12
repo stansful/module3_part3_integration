@@ -15,6 +15,7 @@ export interface DynamoUserImage {
     fileExtension: string;
   };
   status: 'Uploaded' | 'Pending' | 'Rejected';
+  subClipCreated: boolean;
 }
 
 export class ImageService {

@@ -71,7 +71,7 @@ export class PexelsService {
         const newImageName = `${uuid.v4()}.${pictureExtension}`.toLowerCase();
         const metadata = { width, height, fileSize, fileExtension: pictureExtension };
 
-        await this.imageService.create({ name: newImageName, metadata, status: 'Pending' });
+        await this.imageService.create({ name: newImageName, metadata, status: 'Pending', subClipCreated: false });
 
         await this.s3Service.put(newImageName, imageBuffer, this.imageBucket);
       });
