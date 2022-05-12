@@ -17,5 +17,21 @@ export const pexelsConfig: AWSPartitial = {
         },
       ],
     },
+
+    apiPexelsUploadPexelPictures: {
+      handler: 'api/pexels/handler.uploadPexelPictures',
+      memorySize: 512,
+      events: [
+        {
+          httpApi: {
+            path: '/pexels',
+            method: 'post',
+            authorizer: {
+              name: 'jwtSimpleAuthorizerHttpApi',
+            },
+          },
+        },
+      ],
+    },
   },
 };

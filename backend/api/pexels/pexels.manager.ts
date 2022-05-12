@@ -11,4 +11,19 @@ export class PexelsManager {
 
     return this.pexelsService.getPexelsPictures(searchValue);
   }
+
+  public uploadPexelPictures(body?: string) {
+    if (!body) {
+      throw new HttpBadRequestError('Please, provide body');
+    }
+
+    const parsedBody = JSON.parse(body);
+    const ids: string[] | number[] = parsedBody?.ids;
+
+    if (!ids.length) {
+      throw new HttpBadRequestError('Please, provide ids');
+    }
+
+    return this.pexelsService.uploadPexelPictures(ids);
+  }
 }

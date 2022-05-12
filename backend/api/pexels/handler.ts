@@ -19,3 +19,17 @@ export const getPexelsPictures: APIGatewayProxyHandlerV2 = async (event) => {
     return errorHandler(error);
   }
 };
+
+export const uploadPexelPictures: APIGatewayProxyHandlerV2 = async (event) => {
+  log(event);
+
+  try {
+    const body = event.body;
+
+    const response = await pexelsManager.uploadPexelPictures(body);
+
+    return createResponse(200, response);
+  } catch (error) {
+    return errorHandler(error);
+  }
+};
