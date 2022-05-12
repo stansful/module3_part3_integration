@@ -13,7 +13,7 @@ export class PexelsService {
   private readonly metaDataService = new MetaDataService();
   private readonly apiKey = getEnv('PEXELS_API_KEY');
   private readonly imageBucket = getEnv('BUCKET');
-  private readonly client = createClient(this.apiKey);
+  private readonly pexelsClient = createClient(this.apiKey);
   private readonly maxItemsPerPage = 20;
 
   private async searchPexelImages(searchValue: string) {
@@ -22,7 +22,7 @@ export class PexelsService {
       per_page: this.maxItemsPerPage,
     };
 
-    const pictures: PhotosWithTotalResults | ErrorResponse = await this.client.photos.search(params);
+    const pictures: PhotosWithTotalResults | ErrorResponse = await this.pexelsClient.photos.search(params);
 
     if ('error' in pictures) {
       throw new HttpBadRequestError('Failed to fetch images');
@@ -32,7 +32,7 @@ export class PexelsService {
   }
 
   private async getPexelPictureById(id: number | string) {
-    const picture = await this.client.photos.show({ id });
+    const picture = await this.pexelsClient.photos.show({ id });
 
     if ('error' in picture) {
       throw new HttpBadRequestError('Failed to fetch images');
