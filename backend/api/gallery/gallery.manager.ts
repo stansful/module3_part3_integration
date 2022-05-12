@@ -1,4 +1,4 @@
-import { HttpBadRequestError } from '@floteam/errors';
+import { AlreadyExistsError, HttpBadRequestError } from '@floteam/errors';
 import { RequestGalleryQueryParams } from './gallery.interfaces';
 import { GalleryService } from './gallery.service';
 
@@ -44,7 +44,11 @@ export class GalleryManager {
     }
   }
 
-  public updateImageStatus(imageName: string) {
-    return this.galleryService.updateImageStatus(imageName);
+  public updateImage(imageName: string) {
+    if (imageName.startsWith('_SK')) {
+      throw new AlreadyExistsError('Image already resized');
+    }
+
+    return this.galleryService.updateImage(imageName);
   }
 }

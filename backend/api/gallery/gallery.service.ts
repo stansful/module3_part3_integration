@@ -1,6 +1,8 @@
 import { HttpBadRequestError, HttpInternalServerError } from '@floteam/errors';
 import { getEnv } from '@helper/environment';
+import { log } from '@helper/logger';
 import { DynamoUserImage, ImageService } from '@services/dynamoDB/entities/image.service';
+import { ResizeService } from '@services/resize.service';
 import { S3Service } from '@services/s3.service';
 import { UserService } from '@services/dynamoDB/entities/user.service';
 import * as uuid from 'uuid';
@@ -15,6 +17,7 @@ export class GalleryService {
   private readonly imageService = new ImageService();
   private readonly userService = new UserService();
   private readonly s3Service = new S3Service();
+  private readonly resizeService = new ResizeService();
   private readonly imageBucket = getEnv('BUCKET');
   private readonly pictureLimit = getEnv('DEFAULT_PICTURE_LIMIT');
 
@@ -106,10 +109,23 @@ export class GalleryService {
     }
   }
 
-  public async updateImageStatus(imageName: string) {
-    const images = await this.imageService.getByImageName(imageName);
-    const image = images[0];
-    const email = image.primaryKey.split('#')[1];
-    await this.imageService.update(email, imageName, { ...image, status: 'Uploaded' });
+  public async updateImage(imageName: string) {
+    try {
+      log(imageName);
+      const images = await this.imageService.getByImageName(imageName);
+      const image = images[0];
+
+      const email = image.primaryKey.split('#')[1];
+
+      const s3Image = await this.s3Service.get(imageName, this.imageBucket);
+
+      const resizedImage = await this.resizeService.resizeImage(s3Image.Body as Buffer, image.metadata.fileExtension);
+
+      await this.s3Service.put(`_SC${imageName}`, resizedImage, this.imageBucket);
+
+      await this.imageService.update(email, imageName, { ...image, status: 'Uploaded', subClipCreated: true });
+    } catch (error) {
+      throw new HttpInternalServerError(error.message);
+    }
   }
 }

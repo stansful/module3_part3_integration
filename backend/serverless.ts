@@ -85,6 +85,6 @@ module.exports = joinParts(masterConfig, [
   authConfig,
   galleryConfig,
   usersTableConfig,
-  imageBucketConfig,
   pexelsConfig,
+  imageBucketConfig,
 ]);

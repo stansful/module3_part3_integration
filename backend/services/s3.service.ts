@@ -1,6 +1,6 @@
 import { getEnv } from '@helper/environment';
 import { S3 } from 'aws-sdk';
-import { PutObjectOutput, PutObjectRequest } from 'aws-sdk/clients/s3';
+import { GetObjectOutput, GetObjectRequest, PutObjectOutput, PutObjectRequest } from 'aws-sdk/clients/s3';
 
 export class S3Service {
   private readonly s3 = new S3({ region: getEnv('REGION') });
@@ -34,5 +34,13 @@ export class S3Service {
       Body: body,
     };
     return this.s3.putObject(params).promise();
+  }
+
+  public async get(key: string, bucket: string): Promise<GetObjectOutput> {
+    const params: GetObjectRequest = {
+      Bucket: bucket,
+      Key: key,
+    };
+    return this.s3.getObject(params).promise();
   }
 }
