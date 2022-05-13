@@ -1,5 +1,5 @@
+import { DoesNotExistError } from '@exceptions/does-not-exist';
 import Jimp from 'jimp';
-import { DoesNotExistError } from '../errors/does-not-exist';
 
 export class ResizeService {
   private readonly defaultImageResizeWidth = 512;

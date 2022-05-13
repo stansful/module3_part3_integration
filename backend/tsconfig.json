@@ -18,7 +18,8 @@
       "@models/*": ["./models/*"],
       "@services/*": ["./services/*"],
       "@helper/*": ["./helper/*"],
-      "@interfaces/*": ["./interfaces/*"]
+      "@interfaces/*": ["./interfaces/*"],
+      "@exceptions/*": ["./exceptions/*"]
     }
   },
   "exclude": ["node_modules", "coverage", ".build", ".esbuild", ".git"]
