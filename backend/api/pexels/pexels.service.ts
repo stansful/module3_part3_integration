@@ -1,4 +1,4 @@
-import { HttpBadRequestError } from '@floteam/errors';
+import { HttpTooManyRequestsError } from '@floteam/errors';
 import { getEnv } from '@helper/environment';
 import { ImageService } from '@services/dynamoDB/entities/image.service';
 import { MetaDataService } from '@services/meta-data.service';
@@ -25,7 +25,7 @@ export class PexelsService {
     const pictures: PhotosWithTotalResults | ErrorResponse = await this.pexelsClient.photos.search(params);
 
     if ('error' in pictures) {
-      throw new HttpBadRequestError('Failed to fetch images');
+      throw new HttpTooManyRequestsError('Api limit reached, try again later');
     }
 
     return pictures.photos;
@@ -35,7 +35,7 @@ export class PexelsService {
     const picture = await this.pexelsClient.photos.show({ id });
 
     if ('error' in picture) {
-      throw new HttpBadRequestError('Failed to fetch images');
+      throw new HttpTooManyRequestsError('Api limit reached, try again later');
     }
 
     return picture;
@@ -47,38 +47,30 @@ export class PexelsService {
   }
 
   public async getPexelsPictures(searchValue: string) {
-    try {
-      return this.searchPexelImages(searchValue);
-    } catch (error) {
-      throw new HttpBadRequestError(error.message);
-    }
+    return this.searchPexelImages(searchValue);
   }
 
   public async uploadPexelPictures(ids: string[] | number[]) {
-    try {
-      const picturesOriginSize = await Promise.all(
-        ids.map(async (id) => {
-          return this.getPexelPictureById(id);
-        })
-      );
+    const picturesOriginSize = await Promise.all(
+      ids.map(async (id) => {
+        return this.getPexelPictureById(id);
+      })
+    );
 
-      const addPicturesToDynamoAndS3 = picturesOriginSize.map(async (picture) => {
-        const { width, height } = picture;
-        const originalPictureUrl = picture.src.original;
-        const pictureExtension = originalPictureUrl.split('.').pop() || 'jpeg';
-        const imageBuffer = await this.downloadPicture(originalPictureUrl);
-        const fileSize = this.metaDataService.getFileSizeFromBuffer(imageBuffer);
-        const newImageName = `${uuid.v4()}.${pictureExtension}`.toLowerCase();
-        const metadata = { width, height, fileSize, fileExtension: pictureExtension };
+    const addPicturesToDynamoAndS3 = picturesOriginSize.map(async (picture) => {
+      const { width, height } = picture;
+      const originalPictureUrl = picture.src.original;
+      const pictureExtension = originalPictureUrl.split('.').pop() || 'jpeg';
+      const imageBuffer = await this.downloadPicture(originalPictureUrl);
+      const fileSize = this.metaDataService.getFileSizeFromBuffer(imageBuffer);
+      const newImageName = `${uuid.v4()}.${pictureExtension}`.toLowerCase();
+      const metadata = { width, height, fileSize, fileExtension: pictureExtension };
 
-        await this.imageService.create({ name: newImageName, metadata, status: 'Pending', subClipCreated: false });
+      await this.imageService.create({ name: newImageName, metadata, status: 'Pending', subClipCreated: false });
 
-        await this.s3Service.put(newImageName, imageBuffer, this.imageBucket);
-      });
+      await this.s3Service.put(newImageName, imageBuffer, this.imageBucket);
+    });
 
-      await Promise.all(addPicturesToDynamoAndS3);
-    } catch (error) {
-      throw new HttpBadRequestError('Something wrong happened...');
-    }
+    await Promise.all(addPicturesToDynamoAndS3);
   }
 }
