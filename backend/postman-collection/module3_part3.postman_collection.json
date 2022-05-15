@@ -1,7 +1,7 @@
 {
 	"info": {
 		"_postman_id": "a90be1d1-23f9-48a6-a4f3-bc670f867f65",
-		"name": "module3_part2",
+		"name": "module3_part3",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -138,11 +138,11 @@
 				"body": {
 					"mode": "file",
 					"file": {
-						"src": "/Users/philipp/Downloads/pexels-giulia-baptista-11483430.jpg"
+						"src": "/Users/philipp/Downloads/pexels-keith-lobo-11039600.jpg"
 					}
 				},
 				"url": {
-					"raw": "https://image-bucket-uniq-uuid.s3.amazonaws.com/67ae2a5e-a7bc-4f1b-99e2-9ca13771f1f5.jpeg?AWSAccessKeyId=ASIAQBHJIHFMSCLAL6G3&Content-Type=image%2Fjpeg&Expires=1651758556&Signature=nPZfUpIOHkXz7wEdwzPWnbUQJHI%3D&x-amz-security-token=IQoJb3JpZ2luX2VjEMb%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJGMEQCIHPiyabSr3utZBrz1owq7YMs69JHD40wN9y3P9AyapeFAiB1HhVr%2BEtGAUxWvhiB5j9DNeBs2rp3hKMeP3QipvGRgCrHAgiP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAAaDDAwMjYzNjY1OTAzMyIMlds2Crlp942qP13sKpsCzmjuK5M%2BhaVhe0TcJxpA6wqGoLcG33aQyDKD1Axu73tXlIsNrQ%2FtRkSHYAd3ew3x10cFrzgXfmSH85NhoZL0zvf7O5%2BRg1lM7XCDkKjv2Da4QsxsB%2BTvXWKckMeNtwF9prGnX415uvJ%2BjvlKEKgocBtRABFcgNR%2B4Gh%2BlYE6uDQNjf0PM1LLaEYBhEZ0Ke9utmMAYpsSZd0j7Z3sb%2B5PgAR2mrkLdC9rV%2F1zMi4EUvdqhbTo3KM2xw8UzwF8pFp0FAKyRKLJzZxK9UJGQmOMemGrq4r7CA6DfwHowlhYyLv9IZP5oe%2Fj4uU17UVsYkXVaHDEWxGFsR4TgBF1BeZW4NwsTDrvbUjvWaslU3xc2%2FHqHjmn%2Bu4ZW6VzrDCuqc%2BTBjqcAdJ%2FTbB%2F7Z2HtAVpJkbCaon%2F9xkgSZiaZMxLwuqi3YWyL9HsytQRxUGM1rnfmRvqz%2F6qqt%2F61vX56lEA92rvjCIpKrspl3Zmyf%2B8OfP5yTlvM5iRx7gXdwRoiGwqmpB41GVSe3Hg%2F%2F7VHT%2FJRBpFIxOZEwwTgXXh%2FezMAj0oHesJ3HnVk4xB76bl4w3PJ8F6vda8JGDc941EABKJ6Q%3D%3D",
+					"raw": "https://image-bucket-uniq-uuid.s3.amazonaws.com/c73c048b-6b8e-4f27-adae-0a9025766a59.jpeg?AWSAccessKeyId=ASIAQBHJIHFM2PDDSJ4L&Content-Type=image%2Fjpeg&Expires=1652621063&Signature=Nnf%2BeRYa3RgEINkvnWdzuXBnfIQ%3D&x-amz-security-token=IQoJb3JpZ2luX2VjELb%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJHMEUCIQDcPigw6ocfN4tJNcpWQBQ%2BoAaUpepiioySHtzXx22AQgIgGv0nERT%2B%2BkX4iO7dfa7pcSTZki%2FjvxmUGak%2FTb7qrFEqvgIIjv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgwwMDI2MzY2NTkwMzMiDABdQyNZtOkD456ONyqSAnbe7%2FudTox8aqIDLNrFzTl8CA1JGVJTMqLtAnFG%2FI%2F2%2Ba969sYewT%2B5umTRQQFiu4k%2FUWIxc19jX3GF4nsdnWDBcYB38CVCw6x4llLXzwg9bAGBQdOLVWABO%2B2WDGlicOtevQJ2NxtRxO%2Fyg57SdS0p3ySczirLSjo7ZsIqX5%2FBF3%2FJevWNsZA8PKK%2FaiOehqpJHBr6fXmKc9UgcmsLxUoXBuMPuUvX38Bx%2BZFkmyyhhA5VM0zk5ON6oI7bFuqOKDqGef4sawARW4EtceuYNyvmae2vyYrlfgr5PVyEWpms1IksFuxkt3wBjZt1UiXTNp06UkPMONmROZglxzkSM28KzrqRbxSH8H9IP383%2BL2bP6kwovuDlAY6mwFDjwoqCllGwQ9rI976t7E2P%2BhKYXgf4uKr5zNzxFaSQ7KzIA1XhXRYOy57OmraDDHd%2FVISmT0%2BPGf2K0NFMlkj68apY3nxOkyCkNun4Ce0k%2BGmwd1tC%2F6TWR9BQReLv207z%2FkbGcwztmRgdO48RMGwgsRDyucqOKi8Sqi%2Br%2BwTC8J4Sh%2BBy4kzvg3NiogDBOqCmSYIWEhBsUB5DQ%3D%3D",
 					"protocol": "https",
 					"host": [
 						"image-bucket-uniq-uuid",
@@ -151,12 +151,12 @@
 						"com"
 					],
 					"path": [
-						"67ae2a5e-a7bc-4f1b-99e2-9ca13771f1f5.jpeg"
+						"c73c048b-6b8e-4f27-adae-0a9025766a59.jpeg"
 					],
 					"query": [
 						{
 							"key": "AWSAccessKeyId",
-							"value": "ASIAQBHJIHFMSCLAL6G3"
+							"value": "ASIAQBHJIHFM2PDDSJ4L"
 						},
 						{
 							"key": "Content-Type",
@@ -164,15 +164,15 @@
 						},
 						{
 							"key": "Expires",
-							"value": "1651758556"
+							"value": "1652621063"
 						},
 						{
 							"key": "Signature",
-							"value": "nPZfUpIOHkXz7wEdwzPWnbUQJHI%3D"
+							"value": "Nnf%2BeRYa3RgEINkvnWdzuXBnfIQ%3D"
 						},
 						{
 							"key": "x-amz-security-token",
-							"value": "IQoJb3JpZ2luX2VjEMb%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJGMEQCIHPiyabSr3utZBrz1owq7YMs69JHD40wN9y3P9AyapeFAiB1HhVr%2BEtGAUxWvhiB5j9DNeBs2rp3hKMeP3QipvGRgCrHAgiP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAAaDDAwMjYzNjY1OTAzMyIMlds2Crlp942qP13sKpsCzmjuK5M%2BhaVhe0TcJxpA6wqGoLcG33aQyDKD1Axu73tXlIsNrQ%2FtRkSHYAd3ew3x10cFrzgXfmSH85NhoZL0zvf7O5%2BRg1lM7XCDkKjv2Da4QsxsB%2BTvXWKckMeNtwF9prGnX415uvJ%2BjvlKEKgocBtRABFcgNR%2B4Gh%2BlYE6uDQNjf0PM1LLaEYBhEZ0Ke9utmMAYpsSZd0j7Z3sb%2B5PgAR2mrkLdC9rV%2F1zMi4EUvdqhbTo3KM2xw8UzwF8pFp0FAKyRKLJzZxK9UJGQmOMemGrq4r7CA6DfwHowlhYyLv9IZP5oe%2Fj4uU17UVsYkXVaHDEWxGFsR4TgBF1BeZW4NwsTDrvbUjvWaslU3xc2%2FHqHjmn%2Bu4ZW6VzrDCuqc%2BTBjqcAdJ%2FTbB%2F7Z2HtAVpJkbCaon%2F9xkgSZiaZMxLwuqi3YWyL9HsytQRxUGM1rnfmRvqz%2F6qqt%2F61vX56lEA92rvjCIpKrspl3Zmyf%2B8OfP5yTlvM5iRx7gXdwRoiGwqmpB41GVSe3Hg%2F%2F7VHT%2FJRBpFIxOZEwwTgXXh%2FezMAj0oHesJ3HnVk4xB76bl4w3PJ8F6vda8JGDc941EABKJ6Q%3D%3D"
+							"value": "IQoJb3JpZ2luX2VjELb%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLWVhc3QtMSJHMEUCIQDcPigw6ocfN4tJNcpWQBQ%2BoAaUpepiioySHtzXx22AQgIgGv0nERT%2B%2BkX4iO7dfa7pcSTZki%2FjvxmUGak%2FTb7qrFEqvgIIjv%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgwwMDI2MzY2NTkwMzMiDABdQyNZtOkD456ONyqSAnbe7%2FudTox8aqIDLNrFzTl8CA1JGVJTMqLtAnFG%2FI%2F2%2Ba969sYewT%2B5umTRQQFiu4k%2FUWIxc19jX3GF4nsdnWDBcYB38CVCw6x4llLXzwg9bAGBQdOLVWABO%2B2WDGlicOtevQJ2NxtRxO%2Fyg57SdS0p3ySczirLSjo7ZsIqX5%2FBF3%2FJevWNsZA8PKK%2FaiOehqpJHBr6fXmKc9UgcmsLxUoXBuMPuUvX38Bx%2BZFkmyyhhA5VM0zk5ON6oI7bFuqOKDqGef4sawARW4EtceuYNyvmae2vyYrlfgr5PVyEWpms1IksFuxkt3wBjZt1UiXTNp06UkPMONmROZglxzkSM28KzrqRbxSH8H9IP383%2BL2bP6kwovuDlAY6mwFDjwoqCllGwQ9rI976t7E2P%2BhKYXgf4uKr5zNzxFaSQ7KzIA1XhXRYOy57OmraDDHd%2FVISmT0%2BPGf2K0NFMlkj68apY3nxOkyCkNun4Ce0k%2BGmwd1tC%2F6TWR9BQReLv207z%2FkbGcwztmRgdO48RMGwgsRDyucqOKi8Sqi%2Br%2BwTC8J4Sh%2BBy4kzvg3NiogDBOqCmSYIWEhBsUB5DQ%3D%3D"
 						}
 					]
 				}
@@ -226,6 +226,61 @@
 					],
 					"path": [
 						"signUp"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get Pexels Pictures",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "{{dev}}pexels?query=new-york",
+					"host": [
+						"{{dev}}pexels"
+					],
+					"query": [
+						{
+							"key": "query",
+							"value": "new-york"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "upload Pexel Pictures",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{token}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"ids\": [\n        771881,\n        771771\n    ]\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{dev}}pexels",
+					"host": [
+						"{{dev}}pexels"
 					]
 				}
 			},
