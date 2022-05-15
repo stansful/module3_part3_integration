@@ -17,6 +17,11 @@ interface UploadMessage {
   uploadUrl: string;
 }
 
+interface ErrorUploadMessage {
+  status: number;
+  message: string;
+}
+
 interface ErrorMessage {
   errorMessage: string;
 }

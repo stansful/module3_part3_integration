@@ -125,23 +125,28 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  objects:
-                    type: array
-                    items:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    path:
+                      type: string
+                      example: http://example.com/images/uuid-name.jpeg
+                    metadata:
                       type: object
                       properties:
-                        _id:
+                        width:
+                          type: number
+                          example: 1920
+                        height:
+                          type: number
+                          example: 1080
+                        fileSize:
+                          type: number
+                          example: 2925802
+                        fileExtension:
                           type: string
-                        path:
-                          type: string
-                          example: http://qwerty.com/images/1.jpeg
-                        metadata:
-                          type: object
-                  page:
-                    type: number
-                    example: 3
+                          example: jpeg
         '403':
           description: Forbidden
           content:
@@ -262,5 +267,102 @@ paths:
                   status:
                     type: number
                     example: 401
+                  message:
+                    type: string
+
+  /pexels:
+    get:
+      tags:
+        - Pexels
+      summary: gallery with query page parameters
+      parameters:
+        - name: authorization
+          in: header
+          schema:
+            type: string
+          example: token
+        - name: page
+          in: query
+          schema:
+            type: string
+          example: 'animals'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: number
+                      example: 2925802
+                    url:
+                      type: string
+                      example: http://example.com/images/uuid-name.jpeg
+                    width:
+                      type: number
+                      example: 1920
+                    height:
+                      type: number
+                      example: 1080
+                    src:
+                      type: object
+                      properties:
+                        original:
+                          type: string
+                        medium:
+                          type: string
+                        small:
+                          type: string
+        '400':
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: number
+                    example: 400
+                  message:
+                    type: string
+
+    post:
+      tags:
+        - Pexels
+      summary: receive public picture upload link and picture key
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - ids
+              properties:
+                ids:
+                  description: array with picture id's
+                  type: array
+                  items:
+                    type: integer
+                  example: [ 3236652, 1580235, 215512 ]
+      parameters:
+        - name: authorization
+          in: header
+          schema:
+            type: string
+          example: token
+      responses:
+        '200':
+          description: OK
+        '401':
+          description: Not Authorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
                   message:
                     type: string

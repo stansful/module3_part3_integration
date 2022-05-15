@@ -15,33 +15,17 @@ export class GalleryManager {
   }
 
   public uploadPicture(body?: string) {
-    if (!body) {
-      throw new HttpBadRequestError('Please, provide picture metadata');
-    }
-
     try {
-      const parsedBody = JSON.parse(body);
-      const metadata = parsedBody?.metadata;
-
+      const metadata = this.galleryService.validateIncomingBodyMetadata(body);
       return this.galleryService.uploadPicture(metadata);
     } catch (error) {
-      throw new HttpBadRequestError('Invalid body');
+      throw new HttpBadRequestError(error.message);
     }
   }
 
   public getPreSignedUploadLink(email: string, body?: string) {
-    if (!body) {
-      throw new HttpBadRequestError('Please, provide picture metadata');
-    }
-
-    try {
-      const parsedBody = JSON.parse(body);
-      const metadata = parsedBody?.metadata;
-
-      return this.galleryService.getPreSignedUploadLink(email, metadata);
-    } catch (error) {
-      throw new HttpBadRequestError('Invalid body');
-    }
+    const metadata = this.galleryService.validateIncomingBodyMetadata(body);
+    return this.galleryService.getPreSignedUploadLink(email, metadata);
   }
 
   public updateImage(imageName: string) {
