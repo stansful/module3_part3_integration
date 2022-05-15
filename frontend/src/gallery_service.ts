@@ -36,15 +36,20 @@ const createUploadPictureFactory = (button: HTMLInputElement, path: string) => {
   return async (event: Event) => {
     event.preventDefault();
     const picture = document.querySelector('#picture') as HTMLInputElement;
-    if (!picture.files || !picture.files[0]) {
-      return alert('Please choose file to upload');
-    }
+
+    if (!picture.files || !picture.files[0]) return alert('Please choose file to upload');
 
     button.disabled = true;
     try {
       const metadata = await getImageMeta(picture.files[0]);
 
-      const response: UploadMessage = await apiRequest.post(path, { metadata });
+      const response: UploadMessage | ErrorUploadMessage = await apiRequest.post(path, { metadata });
+
+      if ('status' in response) {
+        button.disabled = false;
+        return alert(response.message);
+      }
+
       await fetch(response.uploadUrl, {
         method: 'PUT',
         body: picture.files[0],
