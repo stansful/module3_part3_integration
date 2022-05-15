@@ -16,12 +16,12 @@ export class S3Service {
     return this.s3.getSignedUrlPromise('getObject', params);
   }
 
-  public async getPreSignedPutUrl(key: string, bucket: string, contentType = 'image/jpeg') {
+  public async getPreSignedPutUrl(key: string, bucket: string, mimeType: string) {
     const params = {
       Bucket: bucket,
       Key: key,
       Expires: 60 * this.preSignedPutExpiresTimeInMinutes,
-      ContentType: contentType,
+      ContentType: mimeType,
     };
     return this.s3.getSignedUrlPromise('putObject', params);
   }

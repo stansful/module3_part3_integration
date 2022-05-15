@@ -22,7 +22,7 @@ export class GalleryService {
   private readonly pictureLimit = getEnv('DEFAULT_PICTURE_LIMIT');
 
   private async generatePreSignedUploadResponse(metadata: Metadata, email?: string): Promise<PreSignedUploadResponse> {
-    const generatedImageName = (uuid.v4() + '.jpeg').toLowerCase();
+    const generatedImageName = (uuid.v4() + '.' + metadata.fileExtension).toLowerCase();
 
     await this.imageService.create(
       {
@@ -34,7 +34,11 @@ export class GalleryService {
       email
     );
 
-    const uploadUrl = await this.s3Service.getPreSignedPutUrl(generatedImageName, this.imageBucket);
+    const uploadUrl = await this.s3Service.getPreSignedPutUrl(
+      generatedImageName,
+      this.imageBucket,
+      `image/${metadata.fileExtension}`
+    );
 
     return { key: generatedImageName, uploadUrl };
   }
@@ -53,6 +57,25 @@ export class GalleryService {
     if (result < 1) throw new HttpBadRequestError('Query params value must be more than zero');
 
     return result;
+  }
+
+  public validateIncomingBodyMetadata(body?: string): Metadata {
+    if (!body) {
+      throw new HttpBadRequestError('Please, provide picture metadata');
+    }
+
+    const parsedBody = JSON.parse(body);
+    const metadata = parsedBody?.metadata as Metadata;
+
+    if (!metadata) {
+      throw new HttpBadRequestError('Please, provide picture metadata');
+    }
+
+    if (metadata.fileExtension !== 'jpeg') {
+      throw new HttpBadRequestError('Sorry, but we support only jpeg');
+    }
+
+    return metadata;
   }
 
   public validateAndSanitizeQuery(query: RequestGalleryQueryParams): SanitizedQueryParams {
