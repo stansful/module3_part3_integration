@@ -7,7 +7,7 @@ export class S3Service {
   private readonly preSignedGetExpiresTimeInMinutes = Number(getEnv('PRE_SIGNED_GET_EXPIRES_TIME'));
   private readonly preSignedPutExpiresTimeInMinutes = Number(getEnv('PRE_SIGNED_PUT_EXPIRES_TIME'));
 
-  public async getPreSignedGetUrl(key: string, bucket: string) {
+  public async getPreSignedGetUrl(key: string, bucket: string): Promise<string> {
     const params = {
       Bucket: bucket,
       Key: key,
@@ -16,7 +16,7 @@ export class S3Service {
     return this.s3.getSignedUrlPromise('getObject', params);
   }
 
-  public async getPreSignedPutUrl(key: string, bucket: string, mimeType: string) {
+  public async getPreSignedPutUrl(key: string, bucket: string, mimeType: string): Promise<string> {
     const params = {
       Bucket: bucket,
       Key: key,

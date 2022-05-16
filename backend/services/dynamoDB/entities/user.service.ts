@@ -1,3 +1,4 @@
+import { PutCommandOutput } from '@aws-sdk/lib-dynamodb';
 import { DoesNotExistError } from '@exceptions/does-not-exist';
 import { AlreadyExistsError, HttpInternalServerError } from '@floteam/errors';
 import { RuntimeError } from '@floteam/errors/runtime/runtime-error';
@@ -20,7 +21,7 @@ export class UserService {
   private readonly userPrefix = getEnv('USER_PREFIX');
   private readonly profilePrefix = getEnv('PROFILE_PREFIX');
 
-  public async getProfileByEmail(email: string) {
+  public async getProfileByEmail(email: string): Promise<DynamoUserProfile> {
     const user = await this.dynamoDBService.get(
       this.usersTableName,
       `${this.userPrefix}#${email}`,
@@ -34,7 +35,7 @@ export class UserService {
     return user.Item as DynamoUserProfile;
   }
 
-  public async create(candidate: Pick<DynamoUserProfile, 'email' | 'password'>) {
+  public async create(candidate: Pick<DynamoUserProfile, 'email' | 'password'>): Promise<PutCommandOutput> {
     try {
       await this.getProfileByEmail(candidate.email);
     } catch (error) {

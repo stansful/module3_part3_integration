@@ -16,13 +16,13 @@ export class HashingService implements Hashing {
   private readonly keyLength = Number(getEnv('KEY_LENGTH')) || 20;
   private readonly encryptedDataSeparator = ':';
 
-  public async encrypt(data: UnEncryptedData) {
+  public async encrypt(data: UnEncryptedData): Promise<string> {
     const salt = randomBytes(10).toString('hex');
     const encryptedKey = await scryptAsync(data, salt, this.keyLength);
     return salt + this.encryptedDataSeparator + encryptedKey.toString();
   }
 
-  public async verify(data: UnEncryptedData, encryptedData: string) {
+  public async verify(data: UnEncryptedData, encryptedData: string): Promise<void> {
     const [salt, encryptedKey] = encryptedData.split(this.encryptedDataSeparator);
 
     const candidateKey = await scryptAsync(data, salt, this.keyLength);

@@ -10,7 +10,7 @@ export class ResizeService {
     extension = 'jpeg',
     width = this.defaultImageResizeWidth,
     height = this.defaultImageResizeHeight
-  ) {
+  ): Promise<Buffer> {
     if (!data) {
       throw new DoesNotExistError('Image data does not exist');
     }

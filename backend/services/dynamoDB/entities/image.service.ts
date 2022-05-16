@@ -1,3 +1,4 @@
+import { PutCommandOutput } from '@aws-sdk/lib-dynamodb';
 import { DoesNotExistError } from '@exceptions/does-not-exist';
 import { AlreadyExistsError, HttpInternalServerError } from '@floteam/errors';
 import { RuntimeError } from '@floteam/errors/runtime/runtime-error';
@@ -25,7 +26,7 @@ export class ImageService {
   private readonly imagePrefix = getEnv('IMAGE_PREFIX');
   private readonly publicityImages = getEnv('PUBLICITY_IMAGE_EMAIL');
 
-  async getAllImages() {
+  async getAllImages(): Promise<DynamoUserImage[]> {
     const images = await this.dynamoDBService.query(
       this.usersTableName,
       'primaryKey = :user AND begins_with (sortKey , :image)',
@@ -37,7 +38,7 @@ export class ImageService {
     return (images?.Items ? images.Items : []) as DynamoUserImage[];
   }
 
-  async getByUserEmail(email: string) {
+  async getByUserEmail(email: string): Promise<DynamoUserImage[]> {
     const images = await this.dynamoDBService.query(
       this.usersTableName,
       'primaryKey = :user AND begins_with (sortKey , :image)',
@@ -49,7 +50,7 @@ export class ImageService {
     return (images?.Items ? images.Items : []) as DynamoUserImage[];
   }
 
-  async getByImageName(imageName: string) {
+  async getByImageName(imageName: string): Promise<DynamoUserImage[]> {
     const images = await this.dynamoDBService.query(
       this.usersTableName,
       'sortKey = :image AND begins_with (primaryKey , :user)',
@@ -62,7 +63,7 @@ export class ImageService {
     return (images?.Items ? images.Items : []) as DynamoUserImage[];
   }
 
-  async getByEmailAndImageName(email: string, name: string) {
+  async getByEmailAndImageName(email: string, name: string): Promise<DynamoUserImage> {
     const image = await this.dynamoDBService.get(
       this.usersTableName,
       `${this.userPrefix}#${email}`,
@@ -76,7 +77,10 @@ export class ImageService {
     return image.Item as DynamoUserImage;
   }
 
-  async create(image: Omit<DynamoUserImage, 'primaryKey' | 'sortKey'>, email = this.publicityImages) {
+  async create(
+    image: Omit<DynamoUserImage, 'primaryKey' | 'sortKey'>,
+    email = this.publicityImages
+  ): Promise<PutCommandOutput> {
     try {
       await this.getByEmailAndImageName(email, image.name);
     } catch (error) {
@@ -94,7 +98,11 @@ export class ImageService {
     throw new AlreadyExistsError('Image already exist');
   }
 
-  async update(email: string, imageName: string, attributes: Partial<Omit<DynamoUserImage, 'primaryKey' | 'sortKey'>>) {
+  async update(
+    email: string,
+    imageName: string,
+    attributes: Partial<Omit<DynamoUserImage, 'primaryKey' | 'sortKey'>>
+  ): Promise<PutCommandOutput> {
     return this.dynamoDBService.put(
       this.usersTableName,
       `${this.userPrefix}#${email}`,
