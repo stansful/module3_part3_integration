@@ -10,7 +10,7 @@ export class SQSService {
   }
 
   public async sendMessage(body: string): Promise<SendMessageResult> {
-    const params = {
+    const params: SQS.SendMessageRequest = {
       QueueUrl: this.queueUrl,
       MessageBody: body,
     };

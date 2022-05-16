@@ -7,7 +7,7 @@ import { PexelsManager } from './pexels.manager';
 const pexelsManager = new PexelsManager();
 
 export const getPexelsPictures: APIGatewayProxyHandlerV2 = async (event) => {
-  log(event);
+  log('getPexelsPictures method from pexels handler, event:', event);
 
   try {
     const searchValue = event.queryStringParameters?.query;
@@ -21,12 +21,12 @@ export const getPexelsPictures: APIGatewayProxyHandlerV2 = async (event) => {
 };
 
 export const sendToPictureQueue: APIGatewayProxyHandlerV2 = async (event) => {
-  log(event);
+  log('sendToPictureQueue method from pexels handler, event:', event);
 
   try {
     const body = event.body;
 
-    const response = await pexelsManager.sendPicturesToImageQueue(body);
+    const response = await pexelsManager.sendToPictureQueue(body);
 
     return createResponse(200, response);
   } catch (error) {
@@ -35,7 +35,7 @@ export const sendToPictureQueue: APIGatewayProxyHandlerV2 = async (event) => {
 };
 
 export const pictureProcessingUploading: SQSHandler = async (event) => {
-  log(event);
+  log('pictureProcessingUploading method from pexels handler, event:', event);
 
-  await pexelsManager.processAndUploadPicture(event.Records);
+  await pexelsManager.processAndUploadPictures(event.Records);
 };
