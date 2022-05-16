@@ -1,4 +1,4 @@
-import { HttpBadRequestError, HttpInternalServerError } from '@floteam/errors';
+import { HttpBadRequestError } from '@floteam/errors';
 import { getEnv } from '@helper/environment';
 import { DynamoUserImage, ImageService } from '@services/dynamoDB/entities/image.service';
 import { ResizeService } from '@services/resize.service';
@@ -9,6 +9,7 @@ import {
   Metadata,
   PreSignedUploadResponse,
   RequestGalleryQueryParams,
+  ResponseGetPictures,
   SanitizedQueryParams,
 } from './gallery.interfaces';
 
@@ -19,28 +20,7 @@ export class GalleryService {
   private readonly resizeService = new ResizeService();
   private readonly imageBucket = getEnv('BUCKET');
   private readonly pictureLimit = getEnv('DEFAULT_PICTURE_LIMIT');
-
-  private async generatePreSignedUploadResponse(metadata: Metadata, email?: string): Promise<PreSignedUploadResponse> {
-    const generatedImageName = (uuid.v4() + '.' + metadata.fileExtension).toLowerCase();
-
-    await this.imageService.create(
-      {
-        name: generatedImageName,
-        metadata,
-        status: 'Pending',
-        subClipCreated: false,
-      },
-      email
-    );
-
-    const uploadUrl = await this.s3Service.getPreSignedPutUrl(
-      generatedImageName,
-      this.imageBucket,
-      `image/${metadata.fileExtension}`
-    );
-
-    return { key: generatedImageName, uploadUrl };
-  }
+  private readonly subClipPrefix = getEnv('SUB_CLIP_PREFIX');
 
   private parseQueryParam(defaultValue: number, num?: string): number {
     if (!num) {
@@ -87,66 +67,64 @@ export class GalleryService {
     return { limit, skip, uploadedByUser };
   }
 
-  public async getPictures(query: SanitizedQueryParams, email: string) {
+  public async getPictures(query: SanitizedQueryParams, email: string): Promise<Awaited<ResponseGetPictures>[]> {
     const { uploadedByUser, skip, limit } = query;
     let pictures: DynamoUserImage[];
 
-    try {
-      if (uploadedByUser) {
-        const user = await this.userService.getProfileByEmail(email);
-        pictures = await this.imageService.getByUserEmail(user.email);
-      } else {
-        pictures = await this.imageService.getAllImages();
-      }
-
-      return Promise.all(
-        pictures
-          .filter((picture) => picture.status === 'Uploaded')
-          .slice(skip, skip + limit)
-          .map(async (picture) => {
-            return {
-              path: await this.s3Service.getPreSignedGetUrl(picture.name, this.imageBucket),
-              metadata: picture.metadata,
-            };
-          })
-      );
-    } catch (error) {
-      throw new HttpInternalServerError('Cant send pictures...', error.message);
+    if (uploadedByUser) {
+      const user = await this.userService.getProfileByEmail(email);
+      pictures = await this.imageService.getByUserEmail(user.email);
+    } else {
+      pictures = await this.imageService.getAllImages();
     }
+
+    return Promise.all(
+      pictures
+        .filter((picture) => picture.status === 'Uploaded')
+        .slice(skip, skip + limit)
+        .map(async (picture) => {
+          return {
+            path: await this.s3Service.getPreSignedGetUrl(picture.name, this.imageBucket),
+            metadata: picture.metadata,
+          };
+        })
+    );
   }
 
-  public async uploadPicture(metadata: Metadata): Promise<PreSignedUploadResponse> {
-    try {
-      return this.generatePreSignedUploadResponse(metadata);
-    } catch (error) {
-      throw new HttpBadRequestError('Default picture already exist');
-    }
+  public async generatePreSignedUploadResponse(metadata: Metadata, email?: string): Promise<PreSignedUploadResponse> {
+    const generatedImageName = (uuid.v4() + '.' + metadata.fileExtension).toLowerCase();
+
+    await this.imageService.create(
+      {
+        name: generatedImageName,
+        metadata,
+        status: 'Pending',
+        subClipCreated: false,
+      },
+      email
+    );
+
+    const uploadUrl = await this.s3Service.getPreSignedPutUrl(
+      generatedImageName,
+      this.imageBucket,
+      `image/${metadata.fileExtension}`
+    );
+
+    return { key: generatedImageName, uploadUrl };
   }
 
-  public async getPreSignedUploadLink(email: string, metadata: Metadata): Promise<PreSignedUploadResponse> {
-    try {
-      return this.generatePreSignedUploadResponse(metadata, email);
-    } catch (error) {
-      throw new HttpBadRequestError('Picture already exist');
-    }
-  }
+  public async updatePicture(imageName: string): Promise<void> {
+    const images = await this.imageService.getByImageName(imageName);
+    const image = images[0];
 
-  public async updateImage(imageName: string) {
-    try {
-      const images = await this.imageService.getByImageName(imageName);
-      const image = images[0];
+    const email = image.primaryKey.split('#')[1];
 
-      const email = image.primaryKey.split('#')[1];
+    const s3Image = await this.s3Service.get(imageName, this.imageBucket);
 
-      const s3Image = await this.s3Service.get(imageName, this.imageBucket);
+    const resizedImage = await this.resizeService.resizeImage(s3Image.Body as Buffer, image.metadata.fileExtension);
 
-      const resizedImage = await this.resizeService.resizeImage(s3Image.Body as Buffer, image.metadata.fileExtension);
+    await this.s3Service.put(`${this.subClipPrefix}${imageName}`, resizedImage, this.imageBucket);
 
-      await this.s3Service.put(`_SC${imageName}`, resizedImage, this.imageBucket);
-
-      await this.imageService.update(email, imageName, { ...image, status: 'Uploaded', subClipCreated: true });
-    } catch (error) {
-      throw new HttpInternalServerError(error.message);
-    }
+    await this.imageService.update(email, imageName, { ...image, status: 'Uploaded', subClipCreated: true });
   }
 }

@@ -21,3 +21,8 @@ export interface PreSignedUploadResponse {
   key: string;
   uploadUrl: string;
 }
+
+export interface ResponseGetPictures {
+  path: string;
+  metadata: Metadata;
+}

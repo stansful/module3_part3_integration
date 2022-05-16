@@ -1,16 +1,14 @@
 import { errorHandler } from '@helper/http-api/error-handler';
 import { createResponse } from '@helper/http-api/response';
 import { log } from '@helper/logger';
-import { APIGatewayProxyHandlerV2, APIGatewayProxyWithLambdaAuthorizerHandler, S3Handler } from 'aws-lambda';
+import { APIGatewayProxyHandlerV2, S3Handler } from 'aws-lambda';
 import { RequestGalleryQueryParams } from './gallery.interfaces';
 import { GalleryManager } from './gallery.manager';
 
 const galleryManager = new GalleryManager();
 
-export const getPictures: APIGatewayProxyWithLambdaAuthorizerHandler<{
-  lambda: { email: string };
-}> = async (event) => {
-  log(event);
+export const getPictures: APIGatewayProxyHandlerV2 = async (event) => {
+  log('getPictures method from gallery handler, event:', event);
 
   try {
     const query: RequestGalleryQueryParams = {
@@ -30,7 +28,7 @@ export const getPictures: APIGatewayProxyWithLambdaAuthorizerHandler<{
 };
 
 export const uploadPicture: APIGatewayProxyHandlerV2 = async (event) => {
-  log(event);
+  log('uploadPicture method from gallery handler, event:', event);
   try {
     // @ts-ignore
     const response = await galleryManager.uploadPicture(event.body);
@@ -42,7 +40,7 @@ export const uploadPicture: APIGatewayProxyHandlerV2 = async (event) => {
 };
 
 export const getPreSignedUploadLink: APIGatewayProxyHandlerV2 = async (event) => {
-  log(event);
+  log('getPreSignedUploadLink method from gallery handler, event:', event);
 
   try {
     // @ts-ignore
@@ -57,13 +55,9 @@ export const getPreSignedUploadLink: APIGatewayProxyHandlerV2 = async (event) =>
 };
 
 export const s3Upload: S3Handler = async (event) => {
-  log(event);
+  log('s3Upload method from gallery handler, event:', event);
 
-  try {
-    const imageName = event.Records[0].s3.object.key;
+  const imageName = event.Records[0].s3.object.key;
 
-    await galleryManager.updateImage(imageName);
-  } catch (error) {
-    log(error);
-  }
+  await galleryManager.updatePicture(imageName);
 };
