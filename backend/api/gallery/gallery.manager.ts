@@ -1,4 +1,4 @@
-import { HttpBadRequestError } from '@floteam/errors';
+import { AlreadyExistsError, HttpBadRequestError } from '@floteam/errors';
 import { RequestGalleryQueryParams } from './gallery.interfaces';
 import { GalleryService } from './gallery.service';
 
@@ -15,36 +15,24 @@ export class GalleryManager {
   }
 
   public uploadPicture(body?: string) {
-    if (!body) {
-      throw new HttpBadRequestError('Please, provide picture metadata');
-    }
-
     try {
-      const parsedBody = JSON.parse(body);
-      const metadata = parsedBody?.metadata;
-
+      const metadata = this.galleryService.validateIncomingBodyMetadata(body);
       return this.galleryService.uploadPicture(metadata);
     } catch (error) {
-      throw new HttpBadRequestError('Invalid body');
+      throw new HttpBadRequestError(error.message);
     }
   }
 
   public getPreSignedUploadLink(email: string, body?: string) {
-    if (!body) {
-      throw new HttpBadRequestError('Please, provide picture metadata');
-    }
-
-    try {
-      const parsedBody = JSON.parse(body);
-      const metadata = parsedBody?.metadata;
-
-      return this.galleryService.getPreSignedUploadLink(email, metadata);
-    } catch (error) {
-      throw new HttpBadRequestError('Invalid body');
-    }
+    const metadata = this.galleryService.validateIncomingBodyMetadata(body);
+    return this.galleryService.getPreSignedUploadLink(email, metadata);
   }
 
-  public updateImageStatus(imageName: string) {
-    return this.galleryService.updateImageStatus(imageName);
+  public updateImage(imageName: string) {
+    if (imageName.startsWith('_SK')) {
+      throw new AlreadyExistsError('Image already resized');
+    }
+
+    return this.galleryService.updateImage(imageName);
   }
 }

@@ -59,7 +59,11 @@ export const getPreSignedUploadLink: APIGatewayProxyHandlerV2 = async (event) =>
 export const s3Upload: S3Handler = async (event) => {
   log(event);
 
-  const imageName = event.Records[0].s3.object.key;
+  try {
+    const imageName = event.Records[0].s3.object.key;
 
-  await galleryManager.updateImageStatus(imageName);
+    await galleryManager.updateImage(imageName);
+  } catch (error) {
+    log(error);
+  }
 };
