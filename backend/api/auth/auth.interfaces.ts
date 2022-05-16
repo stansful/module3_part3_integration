@@ -3,4 +3,8 @@ export interface RequestUser {
   password: string;
 }
 
+export interface ResponseToken {
+  token: string;
+}
+
 export type JwtPayload = Omit<RequestUser, 'password'>;

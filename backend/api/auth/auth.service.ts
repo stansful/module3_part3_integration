@@ -3,7 +3,7 @@ import { ResponseMessage } from '@interfaces/response-message.interface';
 import { HashingService } from '@services/hashing.service';
 import { TokenService } from '@services/token.service';
 import { UserService } from '@services/dynamoDB/entities/user.service';
-import { JwtPayload, RequestUser } from './auth.interfaces';
+import { JwtPayload, RequestUser, ResponseToken } from './auth.interfaces';
 
 export class AuthService {
   private readonly hashingService = new HashingService();
@@ -21,13 +21,15 @@ export class AuthService {
     return { email: candidate.email, password: candidate.password };
   }
 
-  public async signIn(candidate: RequestUser): Promise<JwtPayload> {
+  public async signIn(candidate: RequestUser): Promise<ResponseToken> {
     try {
       const user = await this.userService.getProfileByEmail(candidate.email);
 
       await this.hashingService.verify(candidate.password, user.password);
 
-      return this.tokenService.sign({ email: user.email });
+      const token: string = await this.tokenService.sign({ email: user.email });
+
+      return { token };
     } catch (error) {
       throw new HttpUnauthorizedError('Bad credentials');
     }
@@ -36,14 +38,13 @@ export class AuthService {
   public async signUp(candidate: RequestUser): Promise<ResponseMessage> {
     try {
       await this.userService.create(candidate);
-
       return { message: 'Created' };
     } catch (error) {
       throw new HttpBadRequestError('Email already exist');
     }
   }
 
-  public async authenticate(token: string) {
+  public async authenticate(token: string): Promise<JwtPayload> {
     try {
       return this.tokenService.verify<JwtPayload>(token);
     } catch (error) {
