@@ -1,3 +1,4 @@
+import { GetAtt } from '../cf-intristic-fn';
 import { AWSPartitial } from '../types';
 
 export const pexelsConfig: AWSPartitial = {
@@ -18,9 +19,9 @@ export const pexelsConfig: AWSPartitial = {
       ],
     },
 
-    apiPexelsUploadPexelPictures: {
-      handler: 'api/pexels/handler.uploadPexelPictures',
-      memorySize: 512,
+    apiPexelsSendToPictureQueue: {
+      handler: 'api/pexels/handler.sendToPictureQueue',
+      memorySize: 128,
       events: [
         {
           httpApi: {
@@ -29,6 +30,20 @@ export const pexelsConfig: AWSPartitial = {
             authorizer: {
               name: 'jwtSimpleAuthorizerHttpApi',
             },
+          },
+        },
+      ],
+    },
+
+    triggerSqsPictureProcessingUploading: {
+      handler: 'api/pexels/handler.pictureProcessingUploading',
+      events: [
+        {
+          sqs: {
+            arn: GetAtt('pictureQueue.Arn'),
+            batchSize: 100,
+            maximumBatchingWindow: 30,
+            functionResponseType: 'ReportBatchItemFailures',
           },
         },
       ],

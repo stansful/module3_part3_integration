@@ -1,16 +1,19 @@
-import { HttpTooManyRequestsError } from '@floteam/errors';
+import { HttpBadRequestError, HttpTooManyRequestsError } from '@floteam/errors';
 import { getEnv } from '@helper/environment';
 import { ImageService } from '@services/dynamoDB/entities/image.service';
 import { MetaDataService } from '@services/meta-data.service';
 import { S3Service } from '@services/s3.service';
+import { SQSService } from '@services/sqs.service';
 import axios from 'axios';
 import { createClient, ErrorResponse, PaginationParams, PhotosWithTotalResults } from 'pexels';
 import * as uuid from 'uuid';
+import { requestPicturesIds } from './pexels.interfaces';
 
 export class PexelsService {
   private readonly imageService = new ImageService();
   private readonly s3Service = new S3Service();
   private readonly metaDataService = new MetaDataService();
+  private readonly sqsService = new SQSService(getEnv('PICTURE_QUEUE_URL'));
   private readonly apiKey = getEnv('PEXELS_API_KEY');
   private readonly imageBucket = getEnv('BUCKET');
   private readonly pexelsClient = createClient(this.apiKey);
@@ -50,27 +53,30 @@ export class PexelsService {
     return this.searchPexelImages(searchValue);
   }
 
-  public async uploadPexelPictures(ids: string[] | number[]) {
-    const picturesOriginSize = await Promise.all(
-      ids.map(async (id) => {
-        return this.getPexelPictureById(id);
-      })
-    );
+  public async sendPicturesToImageQueue(ids: requestPicturesIds) {
+    try {
+      await this.sqsService.sendMessage(JSON.stringify(ids));
+    } catch (error) {
+      throw new HttpBadRequestError('Failed to send ids to the queue');
+    }
+  }
 
-    const addPicturesToDynamoAndS3 = picturesOriginSize.map(async (picture) => {
-      const { width, height } = picture;
-      const originalPictureUrl = picture.src.original;
-      const pictureExtension = originalPictureUrl.split('.').pop() || 'jpeg';
-      const imageBuffer = await this.downloadPicture(originalPictureUrl);
-      const fileSize = this.metaDataService.getFileSizeFromBuffer(imageBuffer);
-      const newImageName = `${uuid.v4()}.${pictureExtension}`.toLowerCase();
-      const metadata = { width, height, fileSize, fileExtension: pictureExtension };
+  public async processAndUploadPicture(pictureId: number) {
+    const pictureOriginSize = await this.getPexelPictureById(pictureId);
 
-      await this.imageService.create({ name: newImageName, metadata, status: 'Pending', subClipCreated: false });
+    const { width, height } = pictureOriginSize;
+    const originalPictureUrl = pictureOriginSize.src.original;
+    const pictureExtension = originalPictureUrl.split('.').pop() || 'jpeg';
+    const newImageName = `${uuid.v4()}.${pictureExtension}`.toLowerCase();
 
-      await this.s3Service.put(newImageName, imageBuffer, this.imageBucket);
-    });
+    const imageBuffer = await this.downloadPicture(originalPictureUrl);
 
-    await Promise.all(addPicturesToDynamoAndS3);
+    const fileSize = this.metaDataService.getFileSizeFromBuffer(imageBuffer);
+
+    const metadata = { width, height, fileSize, fileExtension: pictureExtension };
+
+    await this.imageService.create({ name: newImageName, metadata, status: 'Pending', subClipCreated: false });
+
+    await this.s3Service.put(newImageName, imageBuffer, this.imageBucket);
   }
 }

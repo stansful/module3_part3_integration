@@ -52,6 +52,8 @@ export const galleryConfig: AWSPartitial = {
 
     triggerS3Upload: {
       handler: 'api/gallery/handler.s3Upload',
+      memorySize: 1024,
+      timeout: 60,
       events: [
         {
           s3: {

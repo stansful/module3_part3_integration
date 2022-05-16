@@ -1,6 +1,5 @@
 import { HttpBadRequestError, HttpInternalServerError } from '@floteam/errors';
 import { getEnv } from '@helper/environment';
-import { log } from '@helper/logger';
 import { DynamoUserImage, ImageService } from '@services/dynamoDB/entities/image.service';
 import { ResizeService } from '@services/resize.service';
 import { S3Service } from '@services/s3.service';
@@ -134,7 +133,6 @@ export class GalleryService {
 
   public async updateImage(imageName: string) {
     try {
-      log(imageName);
       const images = await this.imageService.getByImageName(imageName);
       const image = images[0];
 
