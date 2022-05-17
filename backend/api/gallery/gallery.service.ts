@@ -1,10 +1,8 @@
 import { HttpBadRequestError } from '@floteam/errors';
 import { getEnv } from '@helper/environment';
 import { DynamoUserImage, ImageService } from '@services/dynamoDB/entities/image.service';
-import { ResizeService } from '@services/resize.service';
 import { S3Service } from '@services/s3.service';
 import { UserService } from '@services/dynamoDB/entities/user.service';
-import * as uuid from 'uuid';
 import {
   Metadata,
   PreSignedUploadResponse,
@@ -17,7 +15,6 @@ export class GalleryService {
   private readonly imageService = new ImageService();
   private readonly userService = new UserService();
   private readonly s3Service = new S3Service();
-  private readonly resizeService = new ResizeService();
   private readonly imageBucket = getEnv('BUCKET');
   private readonly pictureLimit = getEnv('DEFAULT_PICTURE_LIMIT');
   private readonly subClipPrefix = getEnv('SUB_CLIP_PREFIX');
@@ -67,8 +64,13 @@ export class GalleryService {
     return { limit, skip, uploadedByUser };
   }
 
-  public async getPictures(query: SanitizedQueryParams, email: string): Promise<Awaited<ResponseGetPictures>[]> {
-    const { uploadedByUser, skip, limit } = query;
+  public checkIfImageAlreadySubClipped(imageName: string) {
+    if (imageName.startsWith(this.subClipPrefix)) {
+      throw new HttpBadRequestError('Image already resized');
+    }
+  }
+
+  public async getAllOrUserPictures(uploadedByUser: boolean, email): Promise<DynamoUserImage[]> {
     let pictures: DynamoUserImage[];
 
     if (uploadedByUser) {
@@ -78,6 +80,14 @@ export class GalleryService {
       pictures = await this.imageService.getAllImages();
     }
 
+    return pictures;
+  }
+
+  public async getPictures(
+    pictures: DynamoUserImage[],
+    skip: number,
+    limit: number
+  ): Promise<Awaited<ResponseGetPictures>[]> {
     return Promise.all(
       pictures
         .filter((picture) => picture.status === 'Uploaded')
@@ -91,40 +101,11 @@ export class GalleryService {
     );
   }
 
-  public async generatePreSignedUploadResponse(metadata: Metadata, email?: string): Promise<PreSignedUploadResponse> {
-    const generatedImageName = (uuid.v4() + '.' + metadata.fileExtension).toLowerCase();
-
-    await this.imageService.create(
-      {
-        name: generatedImageName,
-        metadata,
-        status: 'Pending',
-        subClipCreated: false,
-      },
-      email
-    );
-
-    const uploadUrl = await this.s3Service.getPreSignedPutUrl(
-      generatedImageName,
-      this.imageBucket,
-      `image/${metadata.fileExtension}`
-    );
-
-    return { key: generatedImageName, uploadUrl };
+  public uploadPicture(imageName: string, uploadUrl: string): PreSignedUploadResponse {
+    return { key: imageName, uploadUrl };
   }
 
-  public async updatePicture(imageName: string): Promise<void> {
-    const images = await this.imageService.getByImageName(imageName);
-    const image = images[0];
-
-    const email = image.primaryKey.split('#')[1];
-
-    const s3Image = await this.s3Service.get(imageName, this.imageBucket);
-
-    const resizedImage = await this.resizeService.resizeImage(s3Image.Body as Buffer, image.metadata.fileExtension);
-
-    await this.s3Service.put(`${this.subClipPrefix}${imageName}`, resizedImage, this.imageBucket);
-
-    await this.imageService.update(email, imageName, { ...image, status: 'Uploaded', subClipCreated: true });
+  public getEmailFromPrimaryKey(key: string): string {
+    return key.split('#')[1];
   }
 }
