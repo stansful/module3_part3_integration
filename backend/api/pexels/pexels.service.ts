@@ -4,22 +4,22 @@ import { ResponseMessage } from '@interfaces/response-message.interface';
 import { ImageService } from '@services/dynamoDB/entities/image.service';
 import { MetaDataService } from '@services/meta-data.service';
 import { S3Service } from '@services/s3.service';
-import { SQSService } from '@services/sqs.service';
+import { UniqGeneratorService } from '@services/uniq-generator.service';
 import { SQSRecord } from 'aws-lambda';
 import axios from 'axios';
 import { createClient, ErrorResponse, PaginationParams, Photo, PhotosWithTotalResults } from 'pexels';
-import * as uuid from 'uuid';
 import { requestPicturesIds } from './pexels.interfaces';
 
 export class PexelsService {
   private readonly imageService = new ImageService();
   private readonly s3Service = new S3Service();
   private readonly metaDataService = new MetaDataService();
-  private readonly sqsService = new SQSService(getEnv('PICTURE_QUEUE_URL'));
+  private readonly uniqGeneratorService = new UniqGeneratorService();
   private readonly apiKey = getEnv('PEXELS_API_KEY');
   private readonly imageBucket = getEnv('BUCKET');
   private readonly pexelsClient = createClient(this.apiKey);
   private readonly maxItemsPerPage = 20;
+  private readonly imageExtensionSeparator = '.';
 
   public validateIncomingBodyIds(body?: string): requestPicturesIds {
     if (!body) {
@@ -79,13 +79,8 @@ export class PexelsService {
     return Buffer.from(imageResponse.data);
   }
 
-  public async sendToPictureQueue(ids: requestPicturesIds): Promise<ResponseMessage> {
-    try {
-      await this.sqsService.sendMessage(JSON.stringify(ids));
-      return { message: 'Images will upload as soon as possible' };
-    } catch (error) {
-      throw new HttpBadRequestError('Failed to send ids to the queue');
-    }
+  public async sendToPictureQueue(): Promise<ResponseMessage> {
+    return { message: 'Images will upload as soon as possible' };
   }
 
   public async processAndUploadPictures(pictureIds: number[]): Promise<Awaited<void>[]> {
@@ -97,7 +92,10 @@ export class PexelsService {
         const pictureFullSizeUrl = picture.src.original;
         const pictureExtension = this.metaDataService.getFileExtensionFromName(pictureFullSizeUrl);
 
-        const newImageName = `${uuid.v4()}.${pictureExtension}`.toLowerCase();
+        const newImageName = this.uniqGeneratorService.generateNameWithLowerCase(
+          this.imageExtensionSeparator,
+          pictureExtension
+        );
 
         const imageBuffer = await this.downloadPexelsPicture(pictureFullSizeUrl);
 
