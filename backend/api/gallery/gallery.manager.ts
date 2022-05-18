@@ -2,6 +2,7 @@ import { HttpBadRequestError } from '@floteam/errors';
 import { getEnv } from '@helper/environment';
 import { log } from '@helper/logger';
 import { ImageService } from '@services/dynamoDB/entities/image.service';
+import { UserService } from '@services/dynamoDB/entities/user.service';
 import { ResizeService } from '@services/resize.service';
 import { S3Service } from '@services/s3.service';
 import { UniqGeneratorService } from '@services/uniq-generator.service';
@@ -13,6 +14,7 @@ export class GalleryManager {
   private readonly galleryService: GalleryService;
   private readonly resizeService: ResizeService;
   private readonly imageService: ImageService;
+  private readonly userService: UserService;
   private readonly s3Service: S3Service;
   private readonly subClipPrefix = getEnv('SUB_CLIP_PREFIX');
   private readonly imageBucket = getEnv('BUCKET');
@@ -23,6 +25,7 @@ export class GalleryManager {
     this.galleryService = new GalleryService();
     this.resizeService = new ResizeService();
     this.imageService = new ImageService();
+    this.userService = new UserService();
     this.s3Service = new S3Service();
   }
 
@@ -30,9 +33,20 @@ export class GalleryManager {
     try {
       const sanitizedQuery = this.galleryService.validateAndSanitizeQuery(query);
 
-      const pictures = await this.galleryService.getAllOrUserPictures(sanitizedQuery.uploadedByUser, email);
+      const pictures = await this.galleryService.getAllOrUserPictures(
+        sanitizedQuery.uploadedByUser,
+        email,
+        this.userService.getProfileByEmail,
+        this.imageService.getByUserEmail,
+        this.imageService.getAllImages
+      );
 
-      return this.galleryService.getPictures(pictures, sanitizedQuery.skip, sanitizedQuery.limit);
+      return this.galleryService.getPictures(
+        pictures,
+        sanitizedQuery.skip,
+        sanitizedQuery.limit,
+        this.s3Service.getPreSignedGetUrl
+      );
     } catch (error) {
       log('Failed to get pictures, at getPictures in gallery manager, error:', error);
       throw new HttpBadRequestError(error.message);

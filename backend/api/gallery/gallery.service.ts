@@ -1,8 +1,7 @@
 import { HttpBadRequestError } from '@floteam/errors';
 import { getEnv } from '@helper/environment';
-import { DynamoUserImage, ImageService } from '@services/dynamoDB/entities/image.service';
-import { S3Service } from '@services/s3.service';
-import { UserService } from '@services/dynamoDB/entities/user.service';
+import { DynamoUserImage } from '@services/dynamoDB/entities/image.service';
+import { DynamoUserProfile } from '@services/dynamoDB/entities/user.service';
 import {
   Metadata,
   PreSignedUploadResponse,
@@ -12,9 +11,6 @@ import {
 } from './gallery.interfaces';
 
 export class GalleryService {
-  private readonly imageService = new ImageService();
-  private readonly userService = new UserService();
-  private readonly s3Service = new S3Service();
   private readonly imageBucket = getEnv('BUCKET');
   private readonly pictureLimit = getEnv('DEFAULT_PICTURE_LIMIT');
   private readonly subClipPrefix = getEnv('SUB_CLIP_PREFIX');
@@ -70,14 +66,20 @@ export class GalleryService {
     }
   }
 
-  public async getAllOrUserPictures(uploadedByUser: boolean, email): Promise<DynamoUserImage[]> {
+  public async getAllOrUserPictures(
+    uploadedByUser: boolean,
+    email,
+    getUserProfile: (email: string) => Promise<DynamoUserProfile>,
+    getByUserName: (email: string) => Promise<DynamoUserImage[]>,
+    getAllImages: () => Promise<DynamoUserImage[]>
+  ): Promise<DynamoUserImage[]> {
     let pictures: DynamoUserImage[];
 
     if (uploadedByUser) {
-      const user = await this.userService.getProfileByEmail(email);
-      pictures = await this.imageService.getByUserEmail(user.email);
+      const user = await getUserProfile(email);
+      pictures = await getByUserName(user.email);
     } else {
-      pictures = await this.imageService.getAllImages();
+      pictures = await getAllImages();
     }
 
     return pictures;
@@ -86,7 +88,8 @@ export class GalleryService {
   public async getPictures(
     pictures: DynamoUserImage[],
     skip: number,
-    limit: number
+    limit: number,
+    getUploadLink: (key: string, bucket: string) => Promise<string>
   ): Promise<Awaited<ResponseGetPictures>[]> {
     return Promise.all(
       pictures
@@ -94,7 +97,7 @@ export class GalleryService {
         .slice(skip, skip + limit)
         .map(async (picture) => {
           return {
-            path: await this.s3Service.getPreSignedGetUrl(picture.name, this.imageBucket),
+            path: await getUploadLink(picture.name, this.imageBucket),
             metadata: picture.metadata,
           };
         })
