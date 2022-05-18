@@ -1,15 +1,20 @@
-import { PutCommandOutput } from '@aws-sdk/lib-dynamodb';
 import { HttpBadRequestError, HttpTooManyRequestsError } from '@floteam/errors';
 import { getEnv } from '@helper/environment';
 import { ResponseMessage } from '@interfaces/response-message.interface';
-import { DynamoUserImage } from '@services/dynamoDB/entities/image.service';
+import { ImageService } from '@services/dynamoDB/entities/image.service';
+import { MetaDataService } from '@services/meta-data.service';
+import { S3Service } from '@services/s3.service';
+import { UniqGeneratorService } from '@services/uniq-generator.service';
 import { SQSRecord } from 'aws-lambda';
-import { S3 } from 'aws-sdk';
 import axios from 'axios';
 import { createClient, ErrorResponse, PaginationParams, Photo, PhotosWithTotalResults } from 'pexels';
-import { requestPicturesIds } from './pexels.interfaces';
+import { PictureInfo, requestPicturesIds } from './pexels.interfaces';
 
 export class PexelsService {
+  private readonly uniqGeneratorService = new UniqGeneratorService();
+  private readonly metaDataService = new MetaDataService();
+  private readonly imageService = new ImageService();
+  private readonly s3Service = new S3Service();
   private readonly apiKey = getEnv('PEXELS_API_KEY');
   private readonly imageBucket = getEnv('BUCKET');
   private readonly pexelsClient = createClient(this.apiKey);
@@ -59,7 +64,7 @@ export class PexelsService {
     return pictures.photos;
   }
 
-  public async getPexelPictureById(id: number | string): Promise<Photo> {
+  public async getOnePexelPictureById(id: number | string): Promise<Photo> {
     const picture = await this.pexelsClient.photos.show({ id });
 
     if ('error' in picture) {
@@ -69,43 +74,78 @@ export class PexelsService {
     return picture;
   }
 
-  public async downloadPexelsPicture(url: string): Promise<Buffer> {
+  public async getPexelPicturesById(ids: number[]): Promise<Photo[]> {
+    const pictureIds = ids.map(async (id) => await this.getOnePexelPictureById(id));
+    return Promise.all(pictureIds);
+  }
+
+  public async downloadOnePexelsPicture(url: string): Promise<Buffer> {
     const imageResponse = await axios.get(url, { responseType: 'arraybuffer' });
     return Buffer.from(imageResponse.data);
   }
 
-  public async sendToPictureQueue(): Promise<ResponseMessage> {
+  public downloadPexelsPictures(picturesInfo: PictureInfo[]): Promise<Buffer[]> {
+    const buffers = picturesInfo.map((pictureInfo) => this.downloadOnePexelsPicture(pictureInfo.url));
+    return Promise.all(buffers);
+  }
+
+  public sendToPictureQueue(): ResponseMessage {
     return { message: 'Images will upload as soon as possible' };
   }
 
-  public async processAndUploadPictures(
-    pictureIds: number[],
-    getExtensionFromName: (name: string) => string,
-    nameGenerator: (...ars: string[]) => string,
-    calculateFileSize: (buffer: Buffer) => number,
-    imageCreator: (image: Omit<DynamoUserImage, 'primaryKey' | 'sortKey'>, email?: string) => Promise<PutCommandOutput>,
-    s3Uploader: (key: string, body: string | Buffer, bucket: string, acl?: string) => Promise<S3.PutObjectOutput>
-  ): Promise<Awaited<void>[]> {
-    return Promise.all(
-      pictureIds.map(async (id) => {
-        const picture = await this.getPexelPictureById(id);
+  public getOnePictureInfo(picture: Photo): PictureInfo {
+    const { width, height } = picture;
+    const pictureMaxResolutionUrl = picture.src.original;
+    const pictureExtension = this.metaDataService.getFileExtensionFromName(pictureMaxResolutionUrl);
+    const uniqKey = this.uniqGeneratorService.generateNameWithLowerCase(this.imageExtensionSeparator, pictureExtension);
 
-        const { width, height } = picture;
-        const pictureFullSizeUrl = picture.src.original;
-        const pictureExtension = getExtensionFromName(pictureFullSizeUrl);
+    return { width, height, url: pictureMaxResolutionUrl, key: uniqKey, fileExtension: pictureExtension };
+  }
 
-        const newImageName = nameGenerator(this.imageExtensionSeparator, pictureExtension);
+  public getPicturesInfo(pictures: Photo[]): PictureInfo[] {
+    return pictures.map((picture) => this.getOnePictureInfo(picture));
+  }
 
-        const imageBuffer = await this.downloadPexelsPicture(pictureFullSizeUrl);
+  public calculateOnePictureSize(buffer: Buffer): number {
+    return this.metaDataService.getFileSizeFromBuffer(buffer);
+  }
 
-        const fileSize = calculateFileSize(imageBuffer);
+  public calculatePicturesSize(buffers: Buffer[]): number[] {
+    return buffers.map((buffer) => this.calculateOnePictureSize(buffer));
+  }
 
-        const metadata = { width, height, fileSize, fileExtension: pictureExtension };
+  public async addOnePictureToDynamoDb(name: string, pictureInfo: Omit<PictureInfo, 'url' | 'key'>, fileSize: number) {
+    const metadata = {
+      ...pictureInfo,
+      fileSize,
+    };
 
-        await imageCreator({ name: newImageName, metadata, status: 'Pending', subClipCreated: false });
+    await this.imageService.create({ name, metadata, status: 'Pending', subClipCreated: false });
+  }
 
-        await s3Uploader(newImageName, imageBuffer, this.imageBucket);
-      })
-    );
+  public async addPicturesToDynamoDb(picturesInfo: PictureInfo[], picturesSize: number[]) {
+    const result = picturesInfo.map(async (pictureInfo, index) => {
+      const metadata = {
+        width: pictureInfo.width,
+        height: pictureInfo.height,
+        fileExtension: pictureInfo.fileExtension,
+      };
+
+      return this.addOnePictureToDynamoDb(pictureInfo.key, metadata, picturesSize[index]);
+    });
+
+    await Promise.all(result);
+  }
+
+  public async uploadOnePictureToS3(key: string, buffer: Buffer, bucket = this.imageBucket) {
+    await this.s3Service.put(key, buffer, bucket);
+  }
+
+  public async uploadPicturesToS3(picturesInfo: PictureInfo[], picturesBuffer: Buffer[]) {
+    const result = picturesInfo.map(async (picture, index) => {
+      return this.uploadOnePictureToS3(picture.key, picturesBuffer[index]);
+    });
+
+    await Promise.all(result);
   }
 }
